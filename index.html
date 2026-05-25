@@ -643,25 +643,26 @@ function copiarScript() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   try {
     var data = JSON.parse(e.postData.contents);
+    
     sheet.appendRow([
-      data.dataFmt,
-      data.hora,
-      data.lider,
-      data.membrosStr,
-      data.tipo,
-      data.cliente, // <-- ADICIONADO AQUI NO COPIAR SCRIPT
-      data.local,
-      data.obs,
-      data.statusFmt
+      data.dataFmt,       // Coluna A: Data
+      data.hora,          // Coluna B: Hora
+      data.cliente,       // Coluna C: CLIENTE
+      data.lider,         // Coluna D: Líder
+      data.membrosStr,    // Coluna E: Equipe
+      data.tipo,          // Coluna F: Tipo de Atividade
+      data.local,         // Coluna G: Local
+      data.obs,           // Coluna H: Observações
+      data.statusFmt      // Coluna I: Status
     ]);
-    return ContentService.createTextOutput("Sucesso");
+    return ContentService.createTextOutput("Sucesso").setMimeType(ContentService.MimeType.TEXT);
   } catch(err) {
-    return ContentService.createTextOutput("Erro: " + err.message);
+    return ContentService.createTextOutput("Erro: " + err.message).setMimeType(ContentService.MimeType.TEXT);
   }
 }`;
   navigator.clipboard.writeText(scriptCodigo).then(() => toast('Código do Script Copiado!'));
 }
-
+  
 function testar() {
   if(!cfg.url) { toast('Insira a URL do Web App primeiro', false); return; }
   enviarSheets({
