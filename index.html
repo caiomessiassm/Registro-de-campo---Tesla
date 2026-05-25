@@ -1,8 +1,8 @@
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans, system-ui, sans-serif); background: transparent; color: var(--color-text-primary); font-size: 15px; }
-.app { max-width: 780px; margin: 0 auto; padding: 1rem; }
+body { font-family: var(--font-sans, system-ui, sans-serif); background: #F3F4F6; color: var(--color-text-primary); font-size: 15px; }
+.app { max-width: 780px; margin: 0 auto; padding: 1rem; background: #F3F4F6; }
 .header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
 .header-icon { width: 40px; height: 40px; background: #1D9E75; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0; }
 .header-title { font-size: 17px; font-weight: 500; }
@@ -13,13 +13,13 @@ body { font-family: var(--font-sans, system-ui, sans-serif); background: transpa
 .tab.active { background: var(--color-background-primary); color: var(--color-text-primary); font-weight: 500; border: 0.5px solid var(--color-border-tertiary); }
 .tab:hover:not(.active) { color: var(--color-text-primary); }
 .panel { display: none; }
-.panel.active { display: block; }
+.panel.active { display: block; background: #FFFFFF; padding: 1.2rem; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .form-grid.full { grid-template-columns: 1fr; }
 @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } .tab span.tab-label { display: none; } }
 .field { display: flex; flex-direction: column; gap: 5px; }
 label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-input, select, textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 14px; font-family: inherit; background: var(--color-background-primary); color: var(--color-text-primary); transition: border-color 0.15s; }
+input, select, textarea { width: 100%; padding: 9px 12px; border: 1px solid #D1D5DB; border-radius: 10px; font-size: 14px; font-family: inherit; background: #FFFFFF; color: #111827; transition: all 0.15s; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: #1D9E75; }
 textarea { resize: vertical; min-height: 80px; }
 .section-title { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin: 1.1rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; }
@@ -108,40 +108,53 @@ textarea { resize: vertical; min-height: 80px; }
 
   <!-- REGISTRO -->
   <div class="panel active" id="panel-registro">
-    <div class="form-grid">
-      <div class="field" id="f-tipo">
-        <label>Tipo de atividade</label>
-        <select id="tipo">
-          <option value="">Selecione...</option>
-          <option value="Montagem FV">Montagem de sistema FV</option>
-          <option value="Inspeção Elétrica">Inspeção elétrica</option>
-          <option value="Translado">Translado / logística</option>
-          <option value="Manutenção Corretiva">Manutenção corretiva</option>
-          <option value="Comissionamento">Comissionamento</option>
-          <option value="Outro">Outro</option>
-        </select>
-        <span class="req">Campo obrigatório</span>
-      </div>
+    <div class="form-grid full">
+    
+      <!-- CLIENTE -->
       <div class="field" id="f-cliente">
         <label>Nome do Cliente / Usina</label>
         <input type="text" id="cliente" placeholder="Ex: NOME DO CLIENTE">
         <span class="req">Campo obrigatório</span>
       </div>
-      <div class="field" id="f-local">
-        <label>Local / Endereço</label>
-        <input type="text" id="local" placeholder="Ex: Rua das Flores, 123 — Messejana">
-        <span class="req">Campo obrigatório</span>
+    
+      <!-- TIPO + LOCAL -->
+      <div class="form-grid">
+        <div class="field" id="f-tipo">
+          <label>Tipo de atividade</label>
+          <select id="tipo">
+            <option value="">Selecione...</option>
+            <option value="Montagem FV">Montagem de sistema FV</option>
+            <option value="Inspeção Elétrica">Inspeção elétrica</option>
+            <option value="Translado">Translado / logística</option>
+            <option value="Manutenção Corretiva">Manutenção corretiva</option>
+            <option value="Comissionamento">Comissionamento</option>
+            <option value="Outro">Outro</option>
+          </select>
+          <span class="req">Campo obrigatório</span>
+        </div>
+    
+        <div class="field" id="f-local">
+          <label>Local / Endereço</label>
+          <input type="text" id="local" placeholder="Ex: Rua do Flamengo, 123 — Coroadinho">
+          <span class="req">Campo obrigatório</span>
+        </div>
       </div>
-      <div class="field">
-        <label>Data</label>
-        <input type="date" id="data">
+    
+      <!-- DATA + HORA -->
+      <div class="form-grid">
+        <div class="field">
+          <label>Data</label>
+          <input type="date" id="data">
+        </div>
+    
+        <div class="field">
+          <label>Hora de saída</label>
+          <input type="time" id="hora">
+        </div>
       </div>
-      <div class="field">
-        <label>Hora de saída</label>
-        <input type="time" id="hora">
-      </div>
+    
     </div>
-
+    
     <div class="section-title">Membros em campo</div>
     <div class="member-grid" id="memberList"></div>
     <div class="add-row">
@@ -154,9 +167,9 @@ textarea { resize: vertical; min-height: 80px; }
       <button class="btn-sec" onclick="addMembro()"><i class="ti ti-user-plus" aria-hidden="true"></i> Add</button>
     </div>
 
-    <div class="section-title">Líder da atividade</div>
-    <div class="field" id="f-lider">
-      <select id="lider"><option value="">Selecione o líder...</option></select>
+    <div class="section-title">Supervisor da atividade</div>
+    <div class="field" id="f-supervisor">
+      <select id="supervisor"><option value="">Selecione o supervisor...</option></select>
       <span class="req">Campo obrigatório</span>
     </div>
 
@@ -312,10 +325,10 @@ function initUI() {
 
 function renderMembers() {
   const el = document.getElementById('memberList');
-  const ldr = document.getElementById('lider');
+  const ldr = document.getElementById('supervisor');
   const prev = ldr.value;
   el.innerHTML = '';
-  ldr.innerHTML = '<option value="">Selecione o líder...</option>';
+  ldr.innerHTML = '<option value="">Selecione o supervisor...</option>';
   members.forEach(m => {
     const initials = m.name.split(' ').slice(0,2).map(w=>w[0]).join('');
     const chip = document.createElement('div');
@@ -354,8 +367,8 @@ function validate() {
     if (!inp.value.trim()) { f.classList.add('error'); ok=false; } else f.classList.remove('error');
   });
   if (selM.length===0) { toast('Selecione ao menos um membro em campo',false); ok=false; }
-  const ldr = document.getElementById('lider');
-  const fl = document.getElementById('f-lider');
+  const ldr = document.getElementById('supervisor');
+  const fl = document.getElementById('f-supervisor');
   if (!ldr.value) { fl.classList.add('error'); ok=false; } else fl.classList.remove('error');
   if (!selS) { document.getElementById('status-err').style.display='block'; ok=false; }
   return ok;
@@ -370,7 +383,7 @@ function registrar() {
     local: document.getElementById('local').value.trim(),
     data: document.getElementById('data').value,
     hora: document.getElementById('hora').value,
-    lider: document.getElementById('lider').value,
+    supervisor: document.getElementById('supervisor').value,
     obs: document.getElementById('obs').value.trim(),
     status: selS,
     membros: members.filter(m=>selM.includes(m.id)).map(m=>m.name)
@@ -439,7 +452,7 @@ function renderHist() {
       </div>
       ${a.cliente ? `<div class="acliente" style="font-size:13px; font-weight:bold; color:var(--color-text); margin-bottom:2px;"><i class="ti ti-briefcase" style="font-size:13px;margin-right:4px;vertical-align:-1px;"></i>${a.cliente}</div>` : ''}
       <div class="alocal"><i class="ti ti-map-pin" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.local}</div>
-      <div class="amembers"><i class="ti ti-users" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.membros.join(', ')}${a.lider?' — Líder: '+a.lider:''}</div>
+      <div class="amembers"><i class="ti ti-users" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.membros.join(', ')}${a.supervisor?' — supervisor: '+a.supervisor:''}</div>
       ${a.obs?`<div class="aobs"><i class="ti ti-alert-circle" style="font-size:13px;margin-right:4px;vertical-align:-1px;color:#BA7517;" aria-hidden="true"></i>${a.obs}</div>`:''}
       <span class="astatus ${a.status==='concluido'?'s-ok':'s-ret'}">
         <i class="ti ${a.status==='concluido'?'ti-circle-check':'ti-refresh'}" aria-hidden="true"></i>
@@ -481,7 +494,7 @@ function buildRelText(data) {
     r += `        Local   : ${a.local}\n`;
     r += `        Horário : ${a.hora}\n`;
     r += `        Equipe  : ${a.membros.join(', ')}\n`;
-    if(a.lider) r += `        Líder   : ${a.lider}\n`;
+    if(a.supervisor) r += `        Supervisor   : ${a.supervisor}\n`;
     r += `        Status  : ${a.status==='concluido'?'✔ Concluído':'↩ Necessita retorno'}\n`;
     if(a.obs) r += `        Obs.    : ${a.obs}\n`;
     r += '\n';
@@ -595,7 +608,7 @@ function baixarPDF() {
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(44,44,42);
       doc.text(`Cliente: ${a.cliente}`, M+6, y); y += 5;
       doc.text(`Local: ${a.local}`, M+6, y); y += 5;
-      doc.text(`Líder: ${a.lider} | Equipe: ${a.membros.join(', ')}`, M+6, y); y += 5;
+      doc.text(`Supervisor: ${a.supervisor} | Equipe: ${a.membros.join(', ')}`, M+6, y); y += 5;
       doc.text(`Status: ${a.status === 'concluido' ? 'Concluído' : 'Necessita Retorno'}`, M+6, y); y += 5;
       
       if(a.obs) {
@@ -648,7 +661,7 @@ function copiarScript() {
       data.dataFmt,       // Coluna A: Data
       data.hora,          // Coluna B: Hora
       data.cliente,       // Coluna C: CLIENTE
-      data.lider,         // Coluna D: Líder
+      data.supervisor,         // Coluna D: Supervisor
       data.membrosStr,    // Coluna E: Equipe
       data.tipo,          // Coluna F: Tipo de Atividade
       data.local,         // Coluna G: Local
@@ -667,7 +680,7 @@ function testar() {
   if(!cfg.url) { toast('Insira a URL do Web App primeiro', false); return; }
   enviarSheets({
     tipo: 'Teste de Conexão', local: 'Escritório FV', data: nowVals().date, hora: nowVals().time,
-    lider: 'Sistema', obs: 'Testando integração', status: 'concluido', membros: ['IA Bot']
+    supervisor: 'Sistema', obs: 'Testando integração', status: 'concluido', membros: ['IA Bot']
   });
   toast('Sinal de teste enviado!');
 }
