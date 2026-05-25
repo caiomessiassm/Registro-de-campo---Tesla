@@ -8,10 +8,10 @@ body { font-family: var(--font-sans, system-ui, sans-serif); background: #F3F4F6
 .header-title { font-size: 17px; font-weight: 500; }
 .header-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
 .header-date { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); text-align: right; line-height: 1.5; }
-.tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 4px; }
-.tab { flex: 1; padding: 8px 4px; border: none; background: transparent; border-radius: 6px; font-size: 12px; cursor: pointer; color: var(--color-text-secondary); font-family: inherit; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
-.tab.active { background: var(--color-background-primary); color: var(--color-text-primary); font-weight: 500; border: 0.5px solid var(--color-border-tertiary); }
-.tab:hover:not(.active) { color: var(--color-text-primary); }
+.tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; background: #E5E7EB; border-radius: 14px; padding: 6px; }
+.tab { flex: 1; padding: 10px 6px; border: none; background: #F3F4F6; border-radius: 10px; font-size: 12px; cursor: pointer; color: var(--color-text-secondary); font-family: inherit; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.tab.active { background: #1D9E75); color: white; font-weight: 600; border: 0 2px 6px rgba(29,158,117,0.25); }
+.tab:hover:not(.active) { background: #E5E7EB; color: #111827; }
 .panel { display: none; }
 .panel.active { display: block; background: #FFFFFF; padding: 1.2rem; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -100,10 +100,10 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
 
   <div class="tabs" role="tablist">
-    <button class="tab active" onclick="switchTab('registro',this)" role="tab"><i class="ti ti-plus" aria-hidden="true"></i><span class="tab-label"> Registrar</span></button>
-    <button class="tab" onclick="switchTab('historico',this)" role="tab"><i class="ti ti-list" aria-hidden="true"></i><span class="tab-label"> Histórico</span></button>
-    <button class="tab" onclick="switchTab('relatorio',this)" role="tab"><i class="ti ti-file-text" aria-hidden="true"></i><span class="tab-label"> Relatório</span></button>
-    <button class="tab" onclick="switchTab('config',this)" role="tab"><i class="ti ti-settings" aria-hidden="true"></i><span class="tab-label"> Config</span></button>
+    <button class="tab active" onclick="switchTab('registro',this)" role="tab"><i class="ti ti-plus" aria-hidden="true"></i><span class="tab-label"> REGISTRAR</span></button>
+    <button class="tab" onclick="switchTab('historico',this)" role="tab"><i class="ti ti-list" aria-hidden="true"></i><span class="tab-label"> HISTÓRICO</span></button>
+    <button class="tab" onclick="switchTab('relatorio',this)" role="tab"><i class="ti ti-file-text" aria-hidden="true"></i><span class="tab-label"> RELATÓRIO</span></button>
+    <button class="tab" onclick="switchTab('config',this)" role="tab"><i class="ti ti-settings" aria-hidden="true"></i><span class="tab-label"> CONFIGURAÇÃO</span></button>
   </div>
 
   <!-- REGISTRO -->
