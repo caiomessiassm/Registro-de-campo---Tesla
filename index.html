@@ -93,7 +93,7 @@ textarea { resize: vertical; min-height: 80px; }
   <div class="header">
     <div class="header-icon"><i class="ti ti-sun" aria-hidden="true"></i></div>
     <div>
-      <div class="header-title">Campo FV — Registro de Atividades</div>
+      <div class="header-title">Registro de Atividades em Campo - TESLA</div>
       <div class="header-sub">Gestão de equipes em campo</div>
     </div>
     <div class="header-date" id="headerDate"></div>
@@ -120,6 +120,11 @@ textarea { resize: vertical; min-height: 80px; }
           <option value="Comissionamento">Comissionamento</option>
           <option value="Outro">Outro</option>
         </select>
+        <span class="req">Campo obrigatório</span>
+      </div>
+      <div class="field" id="f-cliente">
+        <label>Nome do Cliente / Usina</label>
+        <input type="text" id="cliente" placeholder="Ex: NOME DO CLIENTE">
         <span class="req">Campo obrigatório</span>
       </div>
       <div class="field" id="f-local">
@@ -257,11 +262,6 @@ textarea { resize: vertical; min-height: 80px; }
 <script>
 const MK = 'fv2_members', AK = 'fv2_acts', CK = 'fv2_cfg';
 let members = JSON.parse(localStorage.getItem(MK) || JSON.stringify([
-  {id:1,name:'Carlos Mendes',role:'Montador'},
-  {id:2,name:'João Silva',role:'Eletricista'},
-  {id:3,name:'Pedro Lima',role:'Líder'},
-  {id:4,name:'Ana Costa',role:'Eletricista'},
-  {id:5,name:'Marcos Souza',role:'Montador'},
 ]));
 let acts = JSON.parse(localStorage.getItem(AK) || '[]');
 let cfg = JSON.parse(localStorage.getItem(CK) || '{"empresa":"","resp":"","url":""}');
@@ -348,7 +348,7 @@ function selStatus(s) {
 
 function validate() {
   let ok = true;
-  ['f-tipo','f-local'].forEach(id => {
+  ['f-tipo','f-cliente','f-local'].forEach(id => {
     const f = document.getElementById(id);
     const inp = f.querySelector('input,select');
     if (!inp.value.trim()) { f.classList.add('error'); ok=false; } else f.classList.remove('error');
@@ -366,6 +366,7 @@ function registrar() {
   const at = {
     id: Date.now(),
     tipo: document.getElementById('tipo').value,
+    cliente: document.getElementById('cliente').value.trim(),
     local: document.getElementById('local').value.trim(),
     data: document.getElementById('data').value,
     hora: document.getElementById('hora').value,
@@ -377,6 +378,7 @@ function registrar() {
   acts.unshift(at); save();
   enviarSheets(at);
   document.getElementById('tipo').value='';
+  document.getElementById('cliente').value='';
   document.getElementById('local').value='';
   document.getElementById('obs').value='';
   selM=[]; selS='';
@@ -391,7 +393,7 @@ async function enviarSheets(at) {
   if (!cfg.url) return;
   try {
     await fetch(cfg.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({...at, dataFmt:fmtDate(at.data), statusFmt:at.status==='concluido'?'Concluído':'Necessita retorno', membrosStr:at.membros.join(', ')})});
+      body:JSON.stringify({...at, dataFmt:fmtDate(at.data), statusFmt:at.status==='concluido'?'Concluído':'Necessita retorno', membrosStr:at.membros.join(', '),cliente: at.cliente})});
   } catch(e){}
 }
 
@@ -435,6 +437,7 @@ function renderHist() {
         <span class="atag ${typeMap[a.tipo]||'t-out'}">${a.tipo}</span>
         <span class="atime">${fmtDate(a.data)} às ${a.hora}</span>
       </div>
+      ${a.cliente ? `<div class="acliente" style="font-size:13px; font-weight:bold; color:var(--color-text); margin-bottom:2px;"><i class="ti ti-briefcase" style="font-size:13px;margin-right:4px;vertical-align:-1px;"></i>${a.cliente}</div>` : ''}
       <div class="alocal"><i class="ti ti-map-pin" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.local}</div>
       <div class="amembers"><i class="ti ti-users" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.membros.join(', ')}${a.lider?' — Líder: '+a.lider:''}</div>
       ${a.obs?`<div class="aobs"><i class="ti ti-alert-circle" style="font-size:13px;margin-right:4px;vertical-align:-1px;color:#BA7517;" aria-hidden="true"></i>${a.obs}</div>`:''}
@@ -474,6 +477,7 @@ function buildRelText(data) {
   r += `══════════════════════════════════════════\n\n`;
   atos.forEach((a,i)=>{
     r += `   [${String(i+1).padStart(2,'0')}] ${a.tipo.toUpperCase()}\n`;
+    r += `        Cliente : ${a.cliente}\n`;
     r += `        Local   : ${a.local}\n`;
     r += `        Horário : ${a.hora}\n`;
     r += `        Equipe  : ${a.membros.join(', ')}\n`;
@@ -589,6 +593,7 @@ function baixarPDF() {
       y += 8;
 
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(44,44,42);
+      doc.text(`Cliente: ${a.cliente}`, M+6, y); y += 5;
       doc.text(`Local: ${a.local}`, M+6, y); y += 5;
       doc.text(`Líder: ${a.lider} | Equipe: ${a.membros.join(', ')}`, M+6, y); y += 5;
       doc.text(`Status: ${a.status === 'concluido' ? 'Concluído' : 'Necessita Retorno'}`, M+6, y); y += 5;
@@ -644,6 +649,7 @@ function copiarScript() {
       data.lider,
       data.membrosStr,
       data.tipo,
+      data.cliente, // <-- ADICIONADO AQUI NO COPIAR SCRIPT
       data.local,
       data.obs,
       data.statusFmt
