@@ -1,0 +1,699 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans, system-ui, sans-serif); background: transparent; color: var(--color-text-primary); font-size: 15px; }
+.app { max-width: 780px; margin: 0 auto; padding: 1rem; }
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.header-icon { width: 40px; height: 40px; background: #1D9E75; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0; }
+.header-title { font-size: 17px; font-weight: 500; }
+.header-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.header-date { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); text-align: right; line-height: 1.5; }
+.tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 4px; }
+.tab { flex: 1; padding: 8px 4px; border: none; background: transparent; border-radius: 6px; font-size: 12px; cursor: pointer; color: var(--color-text-secondary); font-family: inherit; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.tab.active { background: var(--color-background-primary); color: var(--color-text-primary); font-weight: 500; border: 0.5px solid var(--color-border-tertiary); }
+.tab:hover:not(.active) { color: var(--color-text-primary); }
+.panel { display: none; }
+.panel.active { display: block; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-grid.full { grid-template-columns: 1fr; }
+@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } .tab span.tab-label { display: none; } }
+.field { display: flex; flex-direction: column; gap: 5px; }
+label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+input, select, textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 14px; font-family: inherit; background: var(--color-background-primary); color: var(--color-text-primary); transition: border-color 0.15s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #1D9E75; }
+textarea { resize: vertical; min-height: 80px; }
+.section-title { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin: 1.1rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; }
+.section-title::after { content: ''; flex: 1; height: 0.5px; background: var(--color-border-tertiary); }
+.member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 7px; }
+.member-chip { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; transition: all 0.15s; background: var(--color-background-primary); user-select: none; }
+.member-chip:hover { border-color: #1D9E75; }
+.member-chip.selected { border-color: #1D9E75; background: #E1F5EE; }
+.member-avatar { width: 28px; height: 28px; border-radius: 50%; background: #9FE1CB; color: #085041; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.member-chip.selected .member-avatar { background: #1D9E75; color: #fff; }
+.member-name { font-size: 13px; line-height: 1.2; }
+.member-role { font-size: 11px; color: var(--color-text-secondary); }
+.add-row { display: flex; gap: 7px; margin-top: 8px; flex-wrap: wrap; }
+.add-row input { flex: 1; min-width: 120px; }
+.add-row select { flex: 0 0 140px; }
+.status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.status-card { padding: 12px 8px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; text-align: center; transition: all 0.15s; background: var(--color-background-primary); }
+.status-card:hover { border-color: #1D9E75; }
+.status-card.sel-ok { border-color: #3B6D11; background: #EAF3DE; }
+.status-card.sel-ret { border-color: #854F0B; background: #FAEEDA; }
+.status-icon { font-size: 26px; margin-bottom: 3px; }
+.status-lbl { font-size: 13px; font-weight: 500; }
+.btn-primary { width: 100%; padding: 12px; background: #1D9E75; color: #fff; border: none; border-radius: var(--border-radius-md); font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity 0.15s; margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
+.btn-sec { padding: 9px 14px; background: transparent; color: var(--color-text-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: background 0.15s; white-space: nowrap; }
+.btn-sec:hover { background: var(--color-background-secondary); }
+.btn-sec.danger { color: #A32D2D; border-color: #F09595; }
+.btn-sec.danger:hover { background: #FCEBEB; }
+.activity-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.1rem; margin-bottom: 9px; }
+.activity-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.atag { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+.t-mont { background: #E1F5EE; color: #085041; }
+.t-insp { background: #E6F1FB; color: #0C447C; }
+.t-tran { background: #FAEEDA; color: #633806; }
+.t-manu { background: #FCEBEB; color: #791F1F; }
+.t-com  { background: #EEEDFE; color: #3C3489; }
+.t-out  { background: #F1EFE8; color: #444441; }
+.atime { font-size: 12px; color: var(--color-text-secondary); }
+.alocal { font-size: 14px; font-weight: 500; margin: 6px 0 3px; }
+.amembers { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.aobs { font-size: 13px; background: var(--color-background-secondary); border-radius: 6px; padding: 7px 10px; margin-top: 7px; border-left: 2px solid #EF9F27; }
+.astatus { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 99px; margin-top: 7px; }
+.s-ok  { background: #EAF3DE; color: #3B6D11; }
+.s-ret { background: #FAEEDA; color: #854F0B; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 1.25rem; }
+@media (max-width: 480px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 10px; text-align: center; }
+.stat-num { font-size: 24px; font-weight: 500; }
+.stat-lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--color-text-secondary); }
+.empty-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.35; }
+.info-box { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1rem 1.1rem; margin-bottom: 1rem; border: 0.5px solid var(--color-border-tertiary); font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; }
+.badge-info { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; background: #E6F1FB; color: #0C447C; padding: 3px 10px; border-radius: 99px; margin-top: 8px; }
+.toast { position: fixed; bottom: 20px; right: 20px; background: #1D9E75; color: #fff; padding: 12px 16px; border-radius: var(--border-radius-md); font-size: 13px; display: none; align-items: center; gap: 8px; z-index: 9999; max-width: 280px; }
+.toast.show { display: flex; }
+.filter-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+.filter-row select, .filter-row input { flex: 1; min-width: 120px; font-size: 13px; padding: 7px 10px; }
+.pdf-preview { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.1rem; font-size: 13px; line-height: 1.75; white-space: pre-wrap; font-family: var(--font-mono, monospace); max-height: 420px; overflow-y: auto; color: var(--color-text-primary); }
+.req { color: #A32D2D; font-size: 11px; margin-top: 3px; display: none; }
+.field.error input, .field.error select { border-color: #E24B4A; }
+.field.error .req { display: block; }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<h2 class="sr-only" style="position:absolute;left:-9999px;">Sistema de Registro de Atividades em Campo — Energia Fotovoltaica</h2>
+
+<div class="app">
+  <div class="header">
+    <div class="header-icon"><i class="ti ti-sun" aria-hidden="true"></i></div>
+    <div>
+      <div class="header-title">Campo FV — Registro de Atividades</div>
+      <div class="header-sub">Gestão de equipes em campo</div>
+    </div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" onclick="switchTab('registro',this)" role="tab"><i class="ti ti-plus" aria-hidden="true"></i><span class="tab-label"> Registrar</span></button>
+    <button class="tab" onclick="switchTab('historico',this)" role="tab"><i class="ti ti-list" aria-hidden="true"></i><span class="tab-label"> Histórico</span></button>
+    <button class="tab" onclick="switchTab('relatorio',this)" role="tab"><i class="ti ti-file-text" aria-hidden="true"></i><span class="tab-label"> Relatório</span></button>
+    <button class="tab" onclick="switchTab('config',this)" role="tab"><i class="ti ti-settings" aria-hidden="true"></i><span class="tab-label"> Config</span></button>
+  </div>
+
+  <!-- REGISTRO -->
+  <div class="panel active" id="panel-registro">
+    <div class="form-grid">
+      <div class="field" id="f-tipo">
+        <label>Tipo de atividade</label>
+        <select id="tipo">
+          <option value="">Selecione...</option>
+          <option value="Montagem FV">Montagem de sistema FV</option>
+          <option value="Inspeção Elétrica">Inspeção elétrica</option>
+          <option value="Translado">Translado / logística</option>
+          <option value="Manutenção Corretiva">Manutenção corretiva</option>
+          <option value="Comissionamento">Comissionamento</option>
+          <option value="Outro">Outro</option>
+        </select>
+        <span class="req">Campo obrigatório</span>
+      </div>
+      <div class="field" id="f-local">
+        <label>Local / Endereço</label>
+        <input type="text" id="local" placeholder="Ex: Rua das Flores, 123 — Messejana">
+        <span class="req">Campo obrigatório</span>
+      </div>
+      <div class="field">
+        <label>Data</label>
+        <input type="date" id="data">
+      </div>
+      <div class="field">
+        <label>Hora de saída</label>
+        <input type="time" id="hora">
+      </div>
+    </div>
+
+    <div class="section-title">Membros em campo</div>
+    <div class="member-grid" id="memberList"></div>
+    <div class="add-row">
+      <input type="text" id="novoNome" placeholder="Nome do funcionário...">
+      <select id="novoRole">
+        <option value="Montador">Montador</option>
+        <option value="Eletricista">Eletricista</option>
+        <option value="Líder">Líder</option>
+        <option value="Auxiliar">Auxiliar</option>
+        <option value="Técnico">Técnico</option>
+      </select>
+      <button class="btn-sec" onclick="addMembro()"><i class="ti ti-user-plus" aria-hidden="true"></i> Add</button>
+    </div>
+
+    <div class="section-title">Líder da atividade</div>
+    <div class="field" id="f-lider">
+      <select id="lider"><option value="">Selecione o líder...</option></select>
+      <span class="req">Campo obrigatório</span>
+    </div>
+
+    <div class="section-title">Observações</div>
+    <div class="field">
+      <textarea id="obs" placeholder="Descreva ocorrências: dispositivo com defeito, peça em falta, condições adversas no local, etc."></textarea>
+    </div>
+
+    <div class="section-title">Status do serviço</div>
+    <div class="status-grid" id="f-status">
+      <div class="status-card" id="sc-ok" onclick="selStatus('concluido')">
+        <div class="status-icon"><i class="ti ti-circle-check" style="color:#3B6D11;font-size:26px;" aria-hidden="true"></i></div>
+        <div class="status-lbl">Concluído</div>
+      </div>
+      <div class="status-card" id="sc-ret" onclick="selStatus('retorno')">
+        <div class="status-icon"><i class="ti ti-refresh" style="color:#854F0B;font-size:26px;" aria-hidden="true"></i></div>
+        <div class="status-lbl">Necessita retorno</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#A32D2D;margin-top:4px;display:none;" id="status-err">Selecione o status do serviço</div>
+
+    <button class="btn-primary" onclick="registrar()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Registrar atividade</button>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="panel" id="panel-historico">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="filter-row">
+      <input type="date" id="filtData" onchange="renderHist()">
+      <select id="filtTipo" onchange="renderHist()">
+        <option value="">Todos os tipos</option>
+        <option value="Montagem FV">Montagem FV</option>
+        <option value="Inspeção Elétrica">Inspeção Elétrica</option>
+        <option value="Translado">Translado</option>
+        <option value="Manutenção Corretiva">Manutenção Corretiva</option>
+        <option value="Comissionamento">Comissionamento</option>
+        <option value="Outro">Outro</option>
+      </select>
+      <select id="filtStatus" onchange="renderHist()">
+        <option value="">Todos os status</option>
+        <option value="concluido">Concluídos</option>
+        <option value="retorno">Necessita retorno</option>
+      </select>
+    </div>
+    <div id="histList"></div>
+  </div>
+
+  <!-- RELATÓRIO -->
+  <div class="panel" id="panel-relatorio">
+    <div class="form-grid" style="margin-bottom:1rem;">
+      <div class="field">
+        <label>Data do relatório</label>
+        <input type="date" id="relData" onchange="gerarRelatorio()">
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px;">
+        <button class="btn-sec" style="flex:1;justify-content:center;" onclick="gerarRelatorio()"><i class="ti ti-refresh" aria-hidden="true"></i> Atualizar</button>
+        <button class="btn-sec" onclick="baixarPDF()" style="flex:1;justify-content:center;"><i class="ti ti-file-download" aria-hidden="true"></i> PDF</button>
+        <button class="btn-sec" onclick="copiarRel()"><i class="ti ti-copy" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div class="pdf-preview" id="relArea">Selecione uma data para gerar o relatório.</div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="panel" id="panel-config">
+    <div class="info-box">
+      <strong style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><i class="ti ti-brand-google" aria-hidden="true"></i> Google Sheets — Integração automática</strong>
+      1. Acesse <strong>script.google.com</strong> e crie um novo projeto.<br>
+      2. Cole o código (botão abaixo) e publique como <strong>Web App</strong> (acesso: qualquer pessoa).<br>
+      3. Cole a URL gerada no campo abaixo. Cada novo registro será enviado automaticamente.
+      <div><span class="badge-info"><i class="ti ti-info-circle" aria-hidden="true"></i> Envio via POST a cada registro</span></div>
+    </div>
+    <div class="field" style="margin-bottom:10px;">
+      <label>URL do Apps Script (Web App)</label>
+      <input type="url" id="sheetsUrl" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <div class="btn-row">
+      <button class="btn-sec" onclick="copiarScript()"><i class="ti ti-copy" aria-hidden="true"></i> Copiar código Apps Script</button>
+      <button class="btn-sec" onclick="testar()"><i class="ti ti-wifi" aria-hidden="true"></i> Testar conexão</button>
+    </div>
+
+    <div class="section-title">Cabeçalho do relatório</div>
+    <div class="form-grid" style="margin-bottom:10px;">
+      <div class="field">
+        <label>Nome da empresa</label>
+        <input type="text" id="cfEmpresa" placeholder="Ex: Solar Norte Energia">
+      </div>
+      <div class="field">
+        <label>Responsável pelo relatório</label>
+        <input type="text" id="cfResp" placeholder="Seu nome">
+      </div>
+    </div>
+
+    <div class="section-title">Equipe cadastrada</div>
+    <div id="equipeLista" style="margin-bottom:10px;"></div>
+
+    <button class="btn-primary" onclick="salvarConfig()"><i class="ti ti-device-floppy" aria-hidden="true"></i> Salvar configurações</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check" aria-hidden="true"></i><span id="toastMsg"></span></div>
+
+<script>
+const MK = 'fv2_members', AK = 'fv2_acts', CK = 'fv2_cfg';
+let members = JSON.parse(localStorage.getItem(MK) || JSON.stringify([
+  {id:1,name:'Carlos Mendes',role:'Montador'},
+  {id:2,name:'João Silva',role:'Eletricista'},
+  {id:3,name:'Pedro Lima',role:'Líder'},
+  {id:4,name:'Ana Costa',role:'Eletricista'},
+  {id:5,name:'Marcos Souza',role:'Montador'},
+]));
+let acts = JSON.parse(localStorage.getItem(AK) || '[]');
+let cfg = JSON.parse(localStorage.getItem(CK) || '{"empresa":"","resp":"","url":""}');
+let selM = [], selS = '';
+
+const typeMap = {
+  'Montagem FV':'t-mont','Inspeção Elétrica':'t-insp','Translado':'t-tran',
+  'Manutenção Corretiva':'t-manu','Comissionamento':'t-com','Outro':'t-out'
+};
+
+function save() {
+  localStorage.setItem(MK, JSON.stringify(members));
+  localStorage.setItem(AK, JSON.stringify(acts));
+}
+function saveCfg() { localStorage.setItem(CK, JSON.stringify(cfg)); }
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.style.background = ok ? '#1D9E75' : '#A32D2D';
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function nowVals() {
+  const d = new Date();
+  return { date: d.toISOString().split('T')[0], time: d.toTimeString().slice(0,5) };
+}
+function fmtDate(iso) { if(!iso)return''; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+function fmtDateLong(iso) {
+  if(!iso)return'';
+  const d = new Date(iso+'T12:00:00');
+  return d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+}
+
+function initUI() {
+  const n = nowVals();
+  document.getElementById('data').value = n.date;
+  document.getElementById('hora').value = n.time;
+  document.getElementById('relData').value = n.date;
+  document.getElementById('filtData').value = n.date;
+  document.getElementById('sheetsUrl').value = cfg.url;
+  document.getElementById('cfEmpresa').value = cfg.empresa;
+  document.getElementById('cfResp').value = cfg.resp;
+  document.getElementById('headerDate').innerHTML = new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  renderMembers();
+}
+
+function renderMembers() {
+  const el = document.getElementById('memberList');
+  const ldr = document.getElementById('lider');
+  const prev = ldr.value;
+  el.innerHTML = '';
+  ldr.innerHTML = '<option value="">Selecione o líder...</option>';
+  members.forEach(m => {
+    const initials = m.name.split(' ').slice(0,2).map(w=>w[0]).join('');
+    const chip = document.createElement('div');
+    chip.className = 'member-chip' + (selM.includes(m.id)?' selected':'');
+    chip.innerHTML = `<div class="member-avatar">${initials}</div><div><div class="member-name">${m.name}</div><div class="member-role">${m.role}</div></div>`;
+    chip.onclick = () => { selM = selM.includes(m.id) ? selM.filter(x=>x!==m.id) : [...selM, m.id]; renderMembers(); };
+    el.appendChild(chip);
+    const opt = document.createElement('option');
+    opt.value = m.name; opt.textContent = m.name;
+    if (m.name===prev) opt.selected=true;
+    ldr.appendChild(opt);
+  });
+  renderEquipeLista();
+}
+
+function addMembro() {
+  const nm = document.getElementById('novoNome').value.trim();
+  if (!nm) { toast('Digite o nome do funcionário', false); return; }
+  members.push({id:Date.now(), name:nm, role:document.getElementById('novoRole').value});
+  save(); document.getElementById('novoNome').value = '';
+  renderMembers(); toast(`${nm} adicionado!`);
+}
+
+function selStatus(s) {
+  selS = s;
+  document.getElementById('sc-ok').className  = 'status-card' + (s==='concluido'?' sel-ok':'');
+  document.getElementById('sc-ret').className = 'status-card' + (s==='retorno'?' sel-ret':'');
+  document.getElementById('status-err').style.display = 'none';
+}
+
+function validate() {
+  let ok = true;
+  ['f-tipo','f-local'].forEach(id => {
+    const f = document.getElementById(id);
+    const inp = f.querySelector('input,select');
+    if (!inp.value.trim()) { f.classList.add('error'); ok=false; } else f.classList.remove('error');
+  });
+  if (selM.length===0) { toast('Selecione ao menos um membro em campo',false); ok=false; }
+  const ldr = document.getElementById('lider');
+  const fl = document.getElementById('f-lider');
+  if (!ldr.value) { fl.classList.add('error'); ok=false; } else fl.classList.remove('error');
+  if (!selS) { document.getElementById('status-err').style.display='block'; ok=false; }
+  return ok;
+}
+
+function registrar() {
+  if (!validate()) return;
+  const at = {
+    id: Date.now(),
+    tipo: document.getElementById('tipo').value,
+    local: document.getElementById('local').value.trim(),
+    data: document.getElementById('data').value,
+    hora: document.getElementById('hora').value,
+    lider: document.getElementById('lider').value,
+    obs: document.getElementById('obs').value.trim(),
+    status: selS,
+    membros: members.filter(m=>selM.includes(m.id)).map(m=>m.name)
+  };
+  acts.unshift(at); save();
+  enviarSheets(at);
+  document.getElementById('tipo').value='';
+  document.getElementById('local').value='';
+  document.getElementById('obs').value='';
+  selM=[]; selS='';
+  selStatus(''); renderMembers();
+  const n=nowVals();
+  document.getElementById('data').value=n.date;
+  document.getElementById('hora').value=n.time;
+  toast('Atividade registrada com sucesso!');
+}
+
+async function enviarSheets(at) {
+  if (!cfg.url) return;
+  try {
+    await fetch(cfg.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...at, dataFmt:fmtDate(at.data), statusFmt:at.status==='concluido'?'Concluído':'Necessita retorno', membrosStr:at.membros.join(', ')})});
+  } catch(e){}
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  btn.classList.add('active');
+  if(tab==='historico') renderHist();
+  if(tab==='relatorio') gerarRelatorio();
+  if(tab==='config') renderEquipeLista();
+}
+
+function renderHist() {
+  const today = nowVals().date;
+  const fd = document.getElementById('filtData').value || today;
+  const ft = document.getElementById('filtTipo').value;
+  const fs = document.getElementById('filtStatus').value;
+  const todayActs = acts.filter(a=>a.data===today);
+  const filtActs = acts.filter(a=>{
+    if(fd && a.data!==fd) return false;
+    if(ft && a.tipo!==ft) return false;
+    if(fs && a.status!==fs) return false;
+    return true;
+  });
+  const uniq = [...new Set(todayActs.flatMap(a=>a.membros))];
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${todayActs.length}</div><div class="stat-lbl">Hoje</div></div>
+    <div class="stat-card"><div class="stat-num">${todayActs.filter(a=>a.status==='concluido').length}</div><div class="stat-lbl">Concluídas</div></div>
+    <div class="stat-card"><div class="stat-num">${todayActs.filter(a=>a.status==='retorno').length}</div><div class="stat-lbl">Retornos</div></div>
+    <div class="stat-card"><div class="stat-num">${uniq.length}</div><div class="stat-lbl">Em campo</div></div>
+  `;
+  const list = document.getElementById('histList');
+  if (!filtActs.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="ti ti-clipboard-off"></i></div><div>Nenhuma atividade encontrada.</div></div>';
+    return;
+  }
+  list.innerHTML = filtActs.map(a=>`
+    <div class="activity-card">
+      <div class="activity-header">
+        <span class="atag ${typeMap[a.tipo]||'t-out'}">${a.tipo}</span>
+        <span class="atime">${fmtDate(a.data)} às ${a.hora}</span>
+      </div>
+      <div class="alocal"><i class="ti ti-map-pin" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.local}</div>
+      <div class="amembers"><i class="ti ti-users" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.membros.join(', ')}${a.lider?' — Líder: '+a.lider:''}</div>
+      ${a.obs?`<div class="aobs"><i class="ti ti-alert-circle" style="font-size:13px;margin-right:4px;vertical-align:-1px;color:#BA7517;" aria-hidden="true"></i>${a.obs}</div>`:''}
+      <span class="astatus ${a.status==='concluido'?'s-ok':'s-ret'}">
+        <i class="ti ${a.status==='concluido'?'ti-circle-check':'ti-refresh'}" aria-hidden="true"></i>
+        ${a.status==='concluido'?'Concluído':'Necessita retorno'}
+      </span>
+    </div>
+  `).join('');
+}
+
+function buildRelText(data) {
+  const atos = acts.filter(a=>a.data===data);
+  const emp = cfg.empresa || 'EMPRESA';
+  const resp = cfg.resp || 'Responsável';
+  if (!atos.length) return `Nenhuma atividade registrada em ${fmtDate(data)}.`;
+  const uniq = [...new Set(atos.flatMap(a=>a.membros))];
+  const ok = atos.filter(a=>a.status==='concluido');
+  const ret = atos.filter(a=>a.status==='retorno');
+  let r = '';
+  r += `══════════════════════════════════════════\n`;
+  r += `   RELATÓRIO DE ATIVIDADES EM CAMPO\n`;
+  r += `   ${emp}\n`;
+  r += `══════════════════════════════════════════\n`;
+  r += `   Data       : ${fmtDateLong(data)}\n`;
+  r += `   Responsável: ${resp}\n`;
+  r += `   Emissão    : ${new Date().toLocaleString('pt-BR')}\n`;
+  r += `──────────────────────────────────────────\n\n`;
+  r += `   RESUMO DO DIA\n`;
+  r += `   Atividades realizadas : ${atos.length}\n`;
+  r += `   Concluídas            : ${ok.length}\n`;
+  r += `   Necessitam retorno    : ${ret.length}\n`;
+  r += `   Membros em campo      : ${uniq.length}\n`;
+  r += `   Equipe: ${uniq.join(', ')}\n\n`;
+  r += `══════════════════════════════════════════\n`;
+  r += `   DETALHAMENTO\n`;
+  r += `══════════════════════════════════════════\n\n`;
+  atos.forEach((a,i)=>{
+    r += `   [${String(i+1).padStart(2,'0')}] ${a.tipo.toUpperCase()}\n`;
+    r += `        Local   : ${a.local}\n`;
+    r += `        Horário : ${a.hora}\n`;
+    r += `        Equipe  : ${a.membros.join(', ')}\n`;
+    if(a.lider) r += `        Líder   : ${a.lider}\n`;
+    r += `        Status  : ${a.status==='concluido'?'✔ Concluído':'↩ Necessita retorno'}\n`;
+    if(a.obs) r += `        Obs.    : ${a.obs}\n`;
+    r += '\n';
+  });
+  if(ret.length){
+    r += `──────────────────────────────────────────\n`;
+    r += `   PENDÊNCIAS / RETORNOS NECESSÁRIOS\n`;
+    r += `──────────────────────────────────────────\n`;
+    ret.forEach((a,i)=>{
+      r += `   ${i+1}. ${a.tipo} — ${a.local}\n`;
+      if(a.obs) r += `      Motivo: ${a.obs}\n`;
+    });
+    r += '\n';
+  }
+  r += `══════════════════════════════════════════\n`;
+  r += `   Gerado automaticamente — Sistema Campo FV\n`;
+  r += `══════════════════════════════════════════`;
+  return r;
+}
+
+function gerarRelatorio() {
+  const data = document.getElementById('relData').value;
+  document.getElementById('relArea').textContent = buildRelText(data);
+}
+
+function copiarRel() {
+  navigator.clipboard.writeText(document.getElementById('relArea').textContent)
+    .then(()=>toast('Relatório copiado!'));
+}
+
+function baixarPDF() {
+  const data = document.getElementById('relData').value;
+  if (!data) { toast('Selecione uma data', false); return; }
+  const atos = acts.filter(a=>a.data===data);
+  if (!atos.length) { toast('Nenhuma atividade nesta data', false); return; }
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const emp = cfg.empresa || 'EMPRESA';
+    const resp = cfg.resp || 'Responsável';
+    const uniq = [...new Set(atos.flatMap(a=>a.membros))];
+    const ok = atos.filter(a=>a.status==='concluido');
+    const ret = atos.filter(a=>a.status==='retorno');
+    const W = 210, M = 18, CW = W - M*2;
+    let y = 0;
+
+    const line = (t='') => { y += t ? 0 : 5; };
+    const check = (need=20) => { if(y+need > 272){ doc.addPage(); y=18; } };
+    const rect = (x,yy,w,h,fill) => { if(fill){doc.setFillColor(...fill);doc.rect(x,yy,w,h,'F');} };
+
+    // Header bar
+    doc.setFillColor(29,158,117);
+    doc.rect(0,0,210,22,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(255,255,255);
+    doc.text('RELATÓRIO DE ATIVIDADES EM CAMPO', M, 10);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.text(emp, M, 16);
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(8);
+    doc.text(fmtDate(data), W-M, 10, {align:'right'});
+    doc.text(resp, W-M, 16, {align:'right'});
+
+    y = 30;
+    // Summary box
+    doc.setFillColor(241,239,232); doc.rect(M,y,CW,24,'F');
+    doc.setDrawColor(180,178,169); doc.setLineWidth(0.3); doc.rect(M,y,CW,24);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(95,94,90);
+    doc.text('RESUMO DO DIA', M+4, y+6);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(44,44,42);
+    const cols = [
+      [`${atos.length}`, 'Atividades'],
+      [`${ok.length}`, 'Concluídas'],
+      [`${ret.length}`, 'Retornos'],
+      [`${uniq.length}`, 'Em campo'],
+    ];
+    cols.forEach((c,i) => {
+      const cx = M+4 + i*(CW/4);
+      doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(29,158,117);
+      doc.text(c[0], cx, y+15);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(95,94,90);
+      doc.text(c[1], cx, y+21);
+    });
+    y += 30;
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(95,94,90);
+    doc.text(`Equipe: ${uniq.join(', ')}`, M, y); y += 8;
+
+    // Divider
+    doc.setDrawColor(180,178,169); doc.setLineWidth(0.3); doc.line(M, y, W-M, y); y+=5;
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(44,44,42);
+    doc.text('DETALHAMENTO DAS ATIVIDADES', M, y); y+=6;
+
+    const typeColors = {
+      'Montagem FV':[29,158,117],'Inspeção Elétrica':[24,95,165],
+      'Translado':[186,117,23],'Manutenção Corretiva',[163,45,45],
+      'Comissionamento':[83,74,183],'Outro':[95,94,90]
+    };
+    typeColors['Manutenção Corretiva'] = [163,45,45];
+
+    atos.forEach((a,i) => {
+      check(28);
+      const col = typeColors[a.tipo] || [95,94,90];
+      // Card bg
+      doc.setFillColor(249,249,248); doc.rect(M,y,CW,6,'F');
+      doc.setFillColor(...col); doc.rect(M,y,3,6,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...col);
+      doc.text(`${String(i+1).padStart(2,'0')}  ${a.tipo.toUpperCase()}`, M+6, y+4.2);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(95,94,90);
+      doc.text(`${fmtDate(a.data)} — ${a.hora}`, W-M, y+4.2, {align:'right'});
+      y += 7;
+
+      doc.setTextColor(44,44,42);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.text('Local:', M+3, y);
+      doc.setFont('helvetica','normal'); doc.text(a.local, M+16, y); y += 5;
+
+      doc.setFont('helvetica','bold'); doc.text('Equipe:', M+3, y);
+      doc.setFont('helvetica','normal');
+      const mLine = doc.splitTextToSize(a.membros.join(', '), CW-20);
+      doc.text(mLine, M+18, y); y += mLine.length*4.5;
+
+      if(a.lider) {
+        doc.setFont('helvetica','bold'); doc.text('Líder:', M+3, y);
+        doc.setFont('helvetica','normal'); doc.text(a.lider, M+15, y); y += 5;
+      }
+      const statusColor = a.status==='concluido'?[59,109,17]:[133,79,11];
+      const statusTxt = a.status==='concluido'?'CONCLUIDO':'NECESSITA RETORNO';
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...statusColor);
+      doc.text(statusTxt, M+3, y); y += 4;
+
+      if(a.obs) {
+        check(10);
+        doc.setFillColor(250,238,218); doc.rect(M+2,y-1,CW-2,9,'F');
+        doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(99,56,6);
+        const obsLines = doc.splitTextToSize('OBS: '+a.obs, CW-6);
+        doc.text(obsLines, M+4, y+3); y += Math.max(9, obsLines.length*4+3);
+      }
+      y += 4;
+      doc.setDrawColor(211,209,199); doc.setLineWidth(0.2); doc.line(M,y,W-M,y); y += 4;
+    });
+
+    if(ret.length){
+      check(20);
+      doc.setFillColor(250,238,218); doc.rect(M,y,CW,7,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(133,79,11);
+      doc.text('PENDÊNCIAS / RETORNOS NECESSÁRIOS', M+3, y+5); y+=10;
+      ret.forEach((a,i)=>{
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(44,44,42);
+        doc.text(`${i+1}. ${a.tipo} — ${a.local}`, M+3, y); y+=5;
+        if(a.obs){ doc.setTextColor(133,79,11); doc.text(`   Motivo: ${a.obs}`, M+3, y); y+=5; doc.setTextColor(44,44,42); }
+      });
+      y+=3;
+    }
+
+    // Footer
+    doc.setFillColor(29,158,117); doc.rect(0,285,210,12,'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(255,255,255);
+    doc.text('Gerado automaticamente — Sistema de Gestão de Campo FV', M, 292);
+    doc.text(new Date().toLocaleString('pt-BR'), W-M, 292, {align:'right'});
+
+    doc.save(`relatorio-campo-fv-${fmtDate(data).replace(/\//g,'-')}.pdf`);
+    toast('PDF gerado e baixado!');
+  } catch(e) {
+    toast('Erro ao gerar PDF. Tente novamente.',false);
+    console.error(e);
+  }
+}
+
+function renderEquipeLista() {
+  const el = document.getElementById('equipeLista');
+  if(!el) return;
+  el.innerHTML = members.map(m=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);">
+      <div style="width:28px;height:28px;border-radius:50%;background:#9FE1CB;color:#085041;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;">${m.name.split(' ').slice(0,2).map(w=>w[0]).join('')}</div>
+      <div style="flex:1;"><div style="font-size:13px;">${m.name}</div><div style="font-size:11px;color:var(--color-text-secondary);">${m.role}</div></div>
+      <button class="btn-sec danger" onclick="removerMembro(${m.id})" style="padding:5px 8px;font-size:12px;"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>
+  `).join('');
+}
+
+function removerMembro(id) {
+  members = members.filter(m=>m.id!==id);
+  save(); renderMembers(); toast('Funcionário removido');
+}
+
+function salvarConfig() {
+  cfg.url = document.getElementById('sheetsUrl').value.trim();
+  cfg.empresa = document.getElementById('cfEmpresa').value.trim();
+  cfg.resp = document.getElementById('cfResp').value.trim();
+  saveCfg(); toast('Configurações salvas!');
+}
+
+function copiarScript() {
+  const code = `// Cole no Google Apps Script e publique como Web App
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if(sheet.getLastRow()===0){
+    sheet.appendRow(['ID','Tipo','Local','Data','Hora','Líder','Membros','Status','Observações']);
+  }
+  const d = JSON.parse(e.postData.contents);
+  sheet.appendRow([d.id,d.tipo,d.local,d.dataFmt,d.hora,d.lider,d.membrosStr,d.statusFmt,d.obs]);
+  return ContentService.createTextOutput('OK');
+}`;
+  navigator.clipboard.writeText(code).then(()=>toast('Código copiado!'));
+}
+
+async function testar() {
+  const url = document.getElementById('sheetsUrl').value.trim();
+  if(!url){toast('Cole a URL primeiro',false);return;}
+  try{
+    await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({teste:true})});
+    toast('Requisição enviada — verifique a planilha!');
+  }catch(e){toast('Erro de conexão.',false);}
+}
+
+initUI();
+</script>
