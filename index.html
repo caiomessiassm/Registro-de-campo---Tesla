@@ -39,7 +39,7 @@ textarea { resize: vertical; min-height: 80px; }
 .status-card { padding: 12px 8px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; text-align: center; transition: all 0.15s; background: var(--color-background-primary); }
 .status-card:hover { border-color: #1D9E75; }
 .status-card.sel-ok { border-color: #3B6D11; background: #EAF3DE; }
-.status-card.sel-ret { border-color: #854F0B; background: #FAEEDA; }
+.status-card.sel-and { border-color: #A16207; background: #FEF3C7; }
 .status-icon { font-size: 26px; margin-bottom: 3px; }
 .status-lbl { font-size: 13px; font-weight: 500; }
 .btn-primary { width: 100%; padding: 12px; background: #1D9E75; color: #fff; border: none; border-radius: var(--border-radius-md); font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity 0.15s; margin-top: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -96,7 +96,10 @@ textarea { resize: vertical; min-height: 80px; }
       <div class="header-title">Registro de Atividades em Campo - TESLA</div>
       <div class="header-sub">Gestão de equipes em campo</div>
     </div>
-    <div class="header-date" id="headerDate"></div>
+    <div class="header-date">
+      <div id="headerDate"></div>
+      <div id="osDisplay" style="font-weight:700;margin-top:2px;"></div>
+    </div>
   </div>
 
   <div class="tabs" role="tablist">
@@ -140,17 +143,24 @@ textarea { resize: vertical; min-height: 80px; }
         </div>
       </div>
     
-      <!-- DATA + HORA -->
-      <div class="form-grid">
+      <!-- DATA + HORÁRIOS -->
+      <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        
         <div class="field">
           <label>Data</label>
           <input type="date" id="data">
         </div>
-    
+      
         <div class="field">
-          <label>Hora de saída</label>
-          <input type="time" id="hora">
+          <label>Hora de início</label>
+          <input type="time" id="horaInicio">
         </div>
+      
+        <div class="field">
+          <label>Hora de término</label>
+          <input type="time" id="horaFim">
+        </div>
+      
       </div>
     
     </div>
@@ -173,19 +183,33 @@ textarea { resize: vertical; min-height: 80px; }
       <span class="req">Campo obrigatório</span>
     </div>
 
+    <div class="section-title">Descrição</div>
+    <div class="field">
+      <textarea id="descricao" placeholder="Descreva detalhadamente a atividade executada..."></textarea>
+    </div>
+    
     <div class="section-title">Observações</div>
     <div class="field">
       <textarea id="obs" placeholder="Descreva ocorrências: dispositivo com defeito, peça em falta, condições adversas no local, etc."></textarea>
     </div>
 
     <div class="section-title">Status do serviço</div>
-    <div class="status-grid" id="f-status">
+    <div class="status-grid" id="f-status" style="grid-template-columns:1fr 1fr 1fr;">
       <div class="status-card" id="sc-ok" onclick="selStatus('concluido')">
         <div class="status-icon"><i class="ti ti-circle-check" style="color:#3B6D11;font-size:26px;" aria-hidden="true"></i></div>
         <div class="status-lbl">Concluído</div>
       </div>
+      <div class="status-card" id="sc-and" onclick="selStatus('andamento')">
+        <div class="status-icon">
+          <i class="ti ti-progress" style="color:#A16207;font-size:26px;" aria-hidden="true"></i>
+        </div>
+        <div class="status-lbl">Em andamento</div>
+      </div>
+      
       <div class="status-card" id="sc-ret" onclick="selStatus('retorno')">
-        <div class="status-icon"><i class="ti ti-refresh" style="color:#854F0B;font-size:26px;" aria-hidden="true"></i></div>
+        <div class="status-icon">
+          <i class="ti ti-refresh" style="color:#854F0B;font-size:26px;" aria-hidden="true"></i>
+        </div>
         <div class="status-lbl">Necessita retorno</div>
       </div>
     </div>
@@ -279,6 +303,7 @@ let members = JSON.parse(localStorage.getItem(MK) || JSON.stringify([
 let acts = JSON.parse(localStorage.getItem(AK) || '[]');
 let cfg = JSON.parse(localStorage.getItem(CK) || '{"empresa":"","resp":"","url":""}');
 let selM = [], selS = '';
+let osCounter = {};
 
 const typeMap = {
   'Montagem FV':'t-mont','Inspeção Elétrica':'t-insp','Translado':'t-tran',
@@ -310,6 +335,15 @@ function fmtDateLong(iso) {
   return d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
 }
 
+function gerarOS(data) {
+
+  if(!osCounter[data]) osCounter[data] = 1;
+
+  const ordem = String(osCounter[data]).padStart(2,'0');
+
+  return data.replaceAll('-','') + '-' + ordem;
+}
+  
 function initUI() {
   const n = nowVals();
   document.getElementById('data').value = n.date;
@@ -320,6 +354,8 @@ function initUI() {
   document.getElementById('cfEmpresa').value = cfg.empresa;
   document.getElementById('cfResp').value = cfg.resp;
   document.getElementById('headerDate').innerHTML = new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  const osAtual = gerarOS(n.date);
+  document.getElementById('osDisplay').textContent = osAtual;
   renderMembers();
 }
 
@@ -354,8 +390,12 @@ function addMembro() {
 
 function selStatus(s) {
   selS = s;
-  document.getElementById('sc-ok').className  = 'status-card' + (s==='concluido'?' sel-ok':'');
-  document.getElementById('sc-ret').className = 'status-card' + (s==='retorno'?' sel-ret':'');
+  document.getElementById('sc-ok').className =
+    'status-card' + (s==='concluido' ? ' sel-ok' : '');
+  document.getElementById('sc-and').className =
+    'status-card' + (s==='andamento' ? ' sel-and' : '');
+  document.getElementById('sc-ret').className =
+    'status-card' + (s==='retorno' ? ' sel-ret' : '');
   document.getElementById('status-err').style.display = 'none';
 }
 
@@ -376,39 +416,77 @@ function validate() {
 
 function registrar() {
   if (!validate()) return;
-  const at = {
-    id: Date.now(),
-    tipo: document.getElementById('tipo').value,
-    cliente: document.getElementById('cliente').value.trim(),
-    local: document.getElementById('local').value.trim(),
-    data: document.getElementById('data').value,
-    hora: document.getElementById('hora').value,
-    supervisor: document.getElementById('supervisor').value,
-    obs: document.getElementById('obs').value.trim(),
-    status: selS,
-    membros: members.filter(m=>selM.includes(m.id)).map(m=>m.name)
-  };
-  acts.unshift(at); save();
+const osAtual = gerarOS(document.getElementById('data').value);
+
+const at = {
+  id: Date.now(),
+  os: osAtual,
+  tipo: document.getElementById('tipo').value,
+  cliente: document.getElementById('cliente').value.trim(),
+  local: document.getElementById('local').value.trim(),
+  data: document.getElementById('data').value,
+  horaInicio: document.getElementById('horaInicio').value,
+  horaFim: document.getElementById('horaFim').value,
+  supervisor: document.getElementById('supervisor').value,
+  descricao: document.getElementById('descricao').value.trim(),
+  obs: document.getElementById('obs').value.trim(),
+  status: selS,
+  membros: members.filter(m=>selM.includes(m.id)).map(m=>m.name)
+};
+  acts.unshift(at);
+  if(!osCounter[at.data]) osCounter[at.data] = 1;
+  osCounter[at.data]++;
+  save();
   enviarSheets(at);
   document.getElementById('tipo').value='';
   document.getElementById('cliente').value='';
   document.getElementById('local').value='';
+  document.getElementById('descricao').value='';
   document.getElementById('obs').value='';
+  document.getElementById('horaFim').value='';
   selM=[]; selS='';
   selStatus(''); renderMembers();
   const n=nowVals();
   document.getElementById('data').value=n.date;
-  document.getElementById('hora').value=n.time;
+  document.getElementById('horaInicio').value=n.time;
   toast('Atividade registrada com sucesso!');
 }
 
 async function enviarSheets(at) {
-  if (!cfg.url) return;
-  try {
-    await fetch(cfg.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({...at, dataFmt:fmtDate(at.data), statusFmt:at.status==='concluido'?'Concluído':'Necessita retorno', membrosStr:at.membros.join(', '),cliente: at.cliente})});
-  } catch(e){}
+if (!cfg.url) return;
+try {
+```
+await fetch(cfg.url, {
+  method:'POST',
+  mode:'no-cors',
+  headers:{
+    'Content-Type':'application/json'
+  },
+  body: JSON.stringify({
+    os: at.os,
+    dataFmt: fmtDate(at.data),
+    horaInicio: at.horaInicio,
+    horaFim: at.horaFim,
+    cliente: at.cliente,
+    supervisor: at.supervisor,
+    membrosStr: at.membros.join(', '),
+    tipo: at.tipo,
+    descricao: at.descricao,
+    obs: at.obs,
+    local: at.local,
+    statusFmt:
+      at.status === 'concluido'
+        ? 'Concluído'
+        : at.status === 'andamento'
+          ? 'Em andamento'
+          : 'Necessita retorno'
+  })
+});
+```
+} catch(e) {}
+
 }
+
 
 function switchTab(tab, btn) {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -449,7 +527,10 @@ function renderHist() {
       <span class="atag ${typeMap[a.tipo]||'t-out'}">${a.tipo}</span>
     
       <div style="display:flex;align-items:center;gap:10px;">
-        <span class="atime">${fmtDate(a.data)} às ${a.hora}</span>
+        <span class="atime">
+          ${a.os} • ${fmtDate(a.data)} • ${a.horaInicio}
+          ${a.horaFim ? ' → ' + a.horaFim : ''}
+        </span>
     
         <span 
           onclick="excluirAtividade(${a.id})"
@@ -468,10 +549,21 @@ function renderHist() {
       ${a.cliente ? `<div class="acliente" style="font-size:13px; font-weight:bold; color:var(--color-text); margin-bottom:2px;"><i class="ti ti-briefcase" style="font-size:13px;margin-right:4px;vertical-align:-1px;"></i>${a.cliente}</div>` : ''}
       <div class="alocal"><i class="ti ti-map-pin" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.local}</div>
       <div class="amembers"><i class="ti ti-users" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.membros.join(', ')}${a.supervisor?' — supervisor: '+a.supervisor:''}</div>
+      ${a.descricao ? `
+      <div class="aobs" style="border-left:2px solid #1D9E75;">
+        <i class="ti ti-file-description" style="font-size:13px;margin-right:4px;"></i>
+        ${a.descricao}
+      </div>` : ''}
       ${a.obs?`<div class="aobs"><i class="ti ti-alert-circle" style="font-size:13px;margin-right:4px;vertical-align:-1px;color:#BA7517;" aria-hidden="true"></i>${a.obs}</div>`:''}
       <span class="astatus ${a.status==='concluido'?'s-ok':'s-ret'}">
         <i class="ti ${a.status==='concluido'?'ti-circle-check':'ti-refresh'}" aria-hidden="true"></i>
-        ${a.status==='concluido'?'Concluído':'Necessita retorno'}
+        ${
+          a.status==='concluido'
+          ? 'Concluído'
+          : a.status==='andamento'
+            ? 'Em andamento'
+            : 'Necessita retorno'
+        }
       </span>
     </div>
   `).join('');
@@ -507,11 +599,14 @@ function buildRelText(data) {
     r += `   [${String(i+1).padStart(2,'0')}] ${a.tipo.toUpperCase()}\n`;
     r += `        Cliente : ${a.cliente}\n`;
     r += `        Local   : ${a.local}\n`;
-    r += `        Horário : ${a.hora}\n`;
+    r += `        OS       : ${a.os}\n`;
+    r += `        Início   : ${a.horaInicio}\n`;
+    r += `        Término  : ${a.horaFim || '-'}\n`;
     r += `        Equipe  : ${a.membros.join(', ')}\n`;
     if(a.supervisor) r += `        Supervisor   : ${a.supervisor}\n`;
     r += `        Status  : ${a.status==='concluido'?'✔ Concluído':'↩ Necessita retorno'}\n`;
-    if(a.obs) r += `        Obs.    : ${a.obs}\n`;
+    if(a.descricao) r += `        Descrição : ${a.descricao}\n`;
+    if(a.obs) r += `        Obs.      : ${a.obs}\n`;
     r += '\n';
   });
   if(ret.length){
@@ -673,15 +768,18 @@ function copiarScript() {
     var data = JSON.parse(e.postData.contents);
     
     sheet.appendRow([
-      data.dataFmt,       // Coluna A: Data
-      data.hora,          // Coluna B: Hora
-      data.cliente,       // Coluna C: CLIENTE
-      data.supervisor,    // Coluna D: Supervisor
-      data.membrosStr,    // Coluna E: Equipe
-      data.tipo,          // Coluna F: Tipo de Atividade
-      data.local,         // Coluna G: Local
-      data.obs,           // Coluna H: Observações
-      data.statusFmt      // Coluna I: Status
+      data.os,
+      data.dataFmt,
+      data.horaInicio,
+      data.horaFim,
+      data.cliente,
+      data.supervisor,
+      data.membrosStr,
+      data.tipo,
+      data.descricao,
+      data.obs,
+      data.statusFmt,
+      data.local
     ]);
     return ContentService.createTextOutput("Sucesso").setMimeType(ContentService.MimeType.TEXT);
   } catch(err) {
