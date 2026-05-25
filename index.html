@@ -445,11 +445,26 @@ function renderHist() {
     return;
   }
   list.innerHTML = filtActs.map(a=>`
-    <div class="activity-card">
-      <div class="activity-header">
-        <span class="atag ${typeMap[a.tipo]||'t-out'}">${a.tipo}</span>
+    <div class="activity-header">
+      <span class="atag ${typeMap[a.tipo]||'t-out'}">${a.tipo}</span>
+    
+      <div style="display:flex;align-items:center;gap:10px;">
         <span class="atime">${fmtDate(a.data)} às ${a.hora}</span>
+    
+        <span 
+          onclick="excluirAtividade(${a.id})"
+          style="
+            cursor:pointer;
+            color:#A32D2D;
+            display:flex;
+            align-items:center;
+          "
+          title="Excluir atividade"
+        >
+          <i class="ti ti-trash"></i>
+        </span>
       </div>
+    </div>
       ${a.cliente ? `<div class="acliente" style="font-size:13px; font-weight:bold; color:var(--color-text); margin-bottom:2px;"><i class="ti ti-briefcase" style="font-size:13px;margin-right:4px;vertical-align:-1px;"></i>${a.cliente}</div>` : ''}
       <div class="alocal"><i class="ti ti-map-pin" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.local}</div>
       <div class="amembers"><i class="ti ti-users" style="font-size:13px;margin-right:4px;vertical-align:-1px;" aria-hidden="true"></i>${a.membros.join(', ')}${a.supervisor?' — supervisor: '+a.supervisor:''}</div>
@@ -661,7 +676,7 @@ function copiarScript() {
       data.dataFmt,       // Coluna A: Data
       data.hora,          // Coluna B: Hora
       data.cliente,       // Coluna C: CLIENTE
-      data.supervisor,         // Coluna D: Supervisor
+      data.supervisor,    // Coluna D: Supervisor
       data.membrosStr,    // Coluna E: Equipe
       data.tipo,          // Coluna F: Tipo de Atividade
       data.local,         // Coluna G: Local
@@ -685,6 +700,21 @@ function testar() {
   toast('Sinal de teste enviado!');
 }
 
+function excluirAtividade(id) {
+
+  const confirmar = confirm('Deseja realmente excluir esta atividade?');
+
+  if (!confirmar) return;
+
+  acts = acts.filter(a => a.id !== id);
+
+  save();
+
+  renderHist();
+
+  toast('Atividade removida!');
+}
+  
 // Inicialização automática ao carregar a página
 window.onload = function() {
   initUI();
